@@ -8,6 +8,7 @@ import Services from "@/src/components/Services";
 import TechStack from "@/src/components/TechStack";
 import Work from "@/src/components/Work";
 import Process from "@/src/components/Process";
+import AsciiArt from "@/src/components/AsciiArt";
 import Contact from "@/src/components/Contact";
 import Preloader from "@/src/components/Preloader";
 
