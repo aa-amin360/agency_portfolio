@@ -45,7 +45,6 @@ export default function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(0);
 
-  // Scroll height & speed untouched (400vh)
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -69,7 +68,6 @@ export default function Process() {
   }, []);
 
   return (
-    // Scroll height kept untouched at h-[400vh]
     <section ref={containerRef} id="process" className="relative h-[400vh] bg-neutral-950">
       
       {/* Sticky Fullscreen Container */}
@@ -134,9 +132,9 @@ export default function Process() {
 
                     {isActive && (
                       <motion.p
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
                         className="text-neutral-400 text-xs sm:text-sm leading-relaxed pt-2"
                       >
                         {step.description}
@@ -148,16 +146,16 @@ export default function Process() {
             })}
           </div>
 
-          {/* Right Column: Concurrent Card Terminal set strictly to 0.30s */}
-          <div className="lg:col-span-7">
+          {/* Right Column: Fluid Card Transition (300ms ease-in-out fade & slide) */}
+          <div className="lg:col-span-7 relative min-h-[360px] sm:min-h-[400px]">
             <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeStep}
-                initial={{ opacity: 0, y: 18, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -18, scale: 0.98 }}
-                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-                className="relative p-6 sm:p-10 rounded-3xl bg-neutral-900/90 border border-neutral-800 backdrop-blur-2xl shadow-2xl shadow-black overflow-hidden"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="relative w-full p-6 sm:p-10 rounded-3xl bg-neutral-900/90 border border-neutral-800 backdrop-blur-2xl shadow-2xl shadow-black overflow-hidden"
               >
                 {/* Background Glow */}
                 <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
