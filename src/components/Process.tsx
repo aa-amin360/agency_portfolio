@@ -45,7 +45,7 @@ export default function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(0);
 
-  // Calibrated native scroll progress calculation
+  // Extended scroll tracking over 400vh for deep scroll resistance
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -69,8 +69,8 @@ export default function Process() {
   }, []);
 
   return (
-    // Reduced container height from h-[250vh] to h-[160vh] to eliminate bottom empty space
-    <section ref={containerRef} id="process" className="relative h-[160vh] bg-neutral-950">
+    // Height extended to h-[400vh] to give ample scroll time per step
+    <section ref={containerRef} id="process" className="relative h-[400vh] bg-neutral-950">
       
       {/* Sticky Fullscreen Container */}
       <div className="sticky top-0 h-screen flex flex-col justify-center px-6 max-w-7xl mx-auto overflow-hidden">
@@ -98,16 +98,17 @@ export default function Process() {
                   onClick={() => setActiveStep(idx)}
                   className="cursor-pointer group flex items-start gap-4 transition-all duration-300"
                 >
-                  {/* Indicator Square */}
-                  <div className="pt-2 shrink-0">
-                    <div
-                      className={cn(
-                        "w-3.5 h-3.5 rounded-sm transition-all duration-300",
-                        isActive
-                          ? "bg-indigo-500 scale-125 shadow-lg shadow-indigo-500/50"
-                          : "bg-neutral-700 opacity-40 group-hover:opacity-70"
-                      )}
-                    />
+                  {/* Single Sliding Active Cube */}
+                  <div className="w-4 h-4 pt-1.5 shrink-0 flex items-center justify-center">
+                    {isActive ? (
+                      <motion.div
+                        layoutId="activeProcessSquare"
+                        className="w-3.5 h-3.5 rounded-sm bg-indigo-500 shadow-lg shadow-indigo-500/70"
+                        transition={{ type: "spring", stiffness: 220, damping: 22 }}
+                      />
+                    ) : (
+                      <div className="w-1.5 h-1.5 rounded-full bg-neutral-800" />
+                    )}
                   </div>
 
                   {/* Text Header & Body */}
@@ -133,9 +134,9 @@ export default function Process() {
 
                     {isActive && (
                       <motion.p
-                        initial={{ opacity: 0, y: 5 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 0.4 }}
                         className="text-neutral-400 text-xs sm:text-sm leading-relaxed pt-2"
                       >
                         {step.description}
@@ -147,15 +148,15 @@ export default function Process() {
             })}
           </div>
 
-          {/* Right Column: Terminal Card */}
+          {/* Right Column: Premium Card Terminal */}
           <div className="lg:col-span-7">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={activeStep}
-                initial={{ opacity: 0, scale: 0.96, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -15 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -16, scale: 0.98 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 className="relative p-6 sm:p-10 rounded-3xl bg-neutral-900/90 border border-neutral-800 backdrop-blur-2xl shadow-2xl shadow-black overflow-hidden"
               >
                 {/* Background Glow */}
