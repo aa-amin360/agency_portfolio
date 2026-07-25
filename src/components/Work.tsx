@@ -14,8 +14,8 @@ const projects = [
     metric: "3.2x User Growth",
     description: "Architected a full-stack AI platform with real-time WebSockets, GSAP interactive dashboard, and Stripe payments.",
     tags: ["Next.js", "TypeScript", "GSAP", "Tailwind"],
-    gradient: "from-indigo-600/30 via-purple-600/20 to-neutral-900",
-    border: "hover:border-indigo-500/60",
+    glowGradient: "from-indigo-600/40 via-purple-600/20 to-transparent",
+    border: "hover:border-indigo-500/80",
     accentColor: "bg-indigo-500",
   },
   {
@@ -25,8 +25,8 @@ const projects = [
     metric: "+180% Sales Conversion",
     description: "Custom headless Shopify theme with 3D product previews (Three.js), smooth cart animations, and instant checkout.",
     tags: ["Shopify", "Three.js", "Liquid", "Tailwind"],
-    gradient: "from-pink-600/30 via-rose-600/20 to-neutral-900",
-    border: "hover:border-pink-500/60",
+    glowGradient: "from-pink-600/40 via-rose-600/20 to-transparent",
+    border: "hover:border-pink-500/80",
     accentColor: "bg-pink-500",
   },
   {
@@ -36,8 +36,8 @@ const projects = [
     metric: "100k+ Active Downloads",
     description: "Cross-platform mobile application featuring health telemetry tracking, custom micro-interactions, and dark mode UI.",
     tags: ["React Native", "Flutter", "Node.js", "Figma"],
-    gradient: "from-cyan-600/30 via-blue-600/20 to-neutral-900",
-    border: "hover:border-cyan-500/60",
+    glowGradient: "from-cyan-600/40 via-blue-600/20 to-transparent",
+    border: "hover:border-cyan-500/80",
     accentColor: "bg-cyan-500",
   },
 ];
@@ -53,10 +53,9 @@ interface CardProps {
 function Card({ project, index, progress, range, targetScale }: CardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // 3D Perspective Scale & Rotation Transforms based on scroll
+  // 3D Perspective Transforms
   const scale = useTransform(progress, range, [1, targetScale]);
-  const rotateX = useTransform(progress, range, [0, -12]);
-  const opacity = useTransform(progress, range, [1, 0.6]);
+  const rotateX = useTransform(progress, range, [0, -10]);
 
   return (
     <div
@@ -67,16 +66,19 @@ function Card({ project, index, progress, range, targetScale }: CardProps) {
         style={{
           scale,
           rotateX,
-          opacity,
           transformStyle: "preserve-3d",
         }}
-        className={`relative w-full max-w-5xl rounded-3xl p-8 sm:p-12 bg-gradient-to-b ${project.gradient} border border-neutral-800 backdrop-blur-2xl shadow-2xl shadow-black/80 transition-border duration-300 ${project.border} group`}
+        // Solid bg-neutral-900 used to block 100% of underlying card text bleed-through
+        className={`relative w-full max-w-5xl rounded-3xl p-8 sm:p-12 bg-neutral-900 border border-neutral-800 shadow-2xl shadow-black transition-all duration-300 ${project.border} group overflow-hidden`}
       >
+        {/* Inner Ambient Glow over solid background */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${project.glowGradient} opacity-60 pointer-events-none -z-10`} />
+
         {/* Top Header inside Card */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <span className={`w-3 h-3 rounded-full ${project.accentColor} animate-ping`} />
-            <span className="text-xs font-semibold uppercase tracking-widest text-neutral-300 bg-neutral-900/80 px-3 py-1 rounded-full border border-neutral-800">
+            <span className="text-xs font-semibold uppercase tracking-widest text-neutral-300 bg-neutral-950/80 px-3 py-1 rounded-full border border-neutral-800">
               {project.category}
             </span>
           </div>
@@ -101,7 +103,7 @@ function Card({ project, index, progress, range, targetScale }: CardProps) {
               {project.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 text-xs font-medium bg-neutral-950/70 border border-neutral-800 rounded-lg text-neutral-400"
+                  className="px-3 py-1 text-xs font-medium bg-neutral-950/90 border border-neutral-800 rounded-lg text-neutral-300"
                 >
                   {tag}
                 </span>

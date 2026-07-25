@@ -15,8 +15,8 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <main className="relative bg-neutral-950 text-white min-h-screen overflow-x-hidden selection:bg-indigo-500 selection:text-white">
-      {/* High-Impact Orange Diagonal Slice Preloader */}
+    <main className="relative bg-neutral-950 text-white min-h-screen selection:bg-indigo-500 selection:text-white">
+      {/* High-Impact Diagonal Slice Preloader */}
       <Preloader onComplete={() => setIsLoaded(true)} />
 
       {/* Navigation Bar */}

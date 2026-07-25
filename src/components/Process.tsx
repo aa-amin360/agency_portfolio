@@ -1,198 +1,213 @@
 // File: src/components/Process.tsx
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Compass, Palette, Cpu, Rocket, CheckCircle2, ArrowRight } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 const steps = [
   {
     id: "01",
-    title: "Discovery & Architecture",
-    tagline: "Planning the Blueprint for Scale",
-    icon: Compass,
-    color: "from-indigo-500 to-blue-500",
-    badgeColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30",
+    title: "Send us a brief.",
     description:
-      "We dive deep into your project requirements, user personas, and technical scope. We choose the right tech stack (Custom Web, Flutter, or Shopify/WordPress) and design the database architecture.",
-    deliverables: ["Product Requirements Document", "System & DB Architecture", "Tech Stack Finalization", "Project Roadmap & Timeline"],
+      "One paragraph is enough. We reply within 24 business hours with architectural breakdown, tech feasibility, and scope assessment.",
+    badge: "PHASE 01 // DISCOVERY",
+    deliverables: ["Product Architecture", "Tech Stack Selection", "Scope & Budget Mapping"],
   },
   {
     id: "02",
-    title: "UI/UX & Interactive Design",
-    tagline: "High-Fidelity 3D Prototypes",
-    icon: Palette,
-    color: "from-purple-500 to-pink-500",
-    badgeColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+    title: "One conversation.",
     description:
-      "Our designers craft sleek, conversion-focused UI/UX design systems in Figma and interactive 3D motion prototypes in Framer/Spline to visualize the exact user experience before coding.",
-    deliverables: ["Figma Design System", "Interactive Prototypes", "3D & Motion Assets", "User Experience Wireframes"],
+      "You tell us where the brand is going. We give you a clear picture of the design artifacts, timeline, and cost before you commit to anything.",
+    badge: "PHASE 02 // ROADMAP",
+    deliverables: ["Figma UI/UX Wireframes", "Interactive 3D Prototypes", "Milestone Timeline"],
   },
   {
     id: "03",
-    title: "Full-Stack Development",
-    tagline: "Pixel-Perfect High-Speed Coding",
-    icon: Cpu,
-    color: "from-cyan-500 to-teal-500",
-    badgeColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+    title: "Design and build.",
     description:
-      "We write clean, modular, and scalable code using Next.js, React, Node.js, Flutter, or custom CMS platforms. Integrated with GSAP & Three.js for butter-smooth 60fps animations.",
-    deliverables: ["Clean Modular Codebase", "CMS / Admin Integration", "API & Payment Setup", "60fps Smooth Animations"],
+      "Custom-coded from the ground up using Next.js, React, Flutter, or Shopify/WordPress. Motion is the medium, running through every transition and interaction.",
+    badge: "PHASE 03 // ENGINEERING",
+    deliverables: ["Modular Custom Code", "60fps GSAP & 3D Motion", "CMS / Admin Integration"],
   },
   {
     id: "04",
-    title: "Testing, Launch & Scale",
-    tagline: "100/100 Lighthouse & Zero Friction",
-    icon: Rocket,
-    color: "from-amber-500 to-orange-500",
-    badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+    title: "Ship.",
     description:
-      "Rigorous cross-browser testing, mobile responsiveness checks, Core Web Vitals optimization, and automated CI/CD deployment. We don't just launch; we help you scale.",
-    deliverables: ["Core Web Vitals Audit (100 Score)", "SEO & Metadata Setup", "Domain & Server Deployment", "Post-Launch Maintenance Support"],
+      "Rigorous cross-browser testing, 100/100 Lighthouse performance, Core Web Vitals optimization, and seamless automated CI/CD deployment.",
+    badge: "PHASE 04 // LAUNCH & SCALE",
+    deliverables: ["Lighthouse 100 Audit", "SEO & Meta Optimization", "Production Server Deployment"],
   },
 ];
 
 export default function Process() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(0);
 
+  // Calibrated native scroll progress calculation
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const totalHeight = containerRef.current.clientHeight - window.innerHeight;
+      
+      if (totalHeight <= 0) return;
+
+      const currentScroll = -rect.top;
+      const progress = Math.max(0, Math.min(0.99, currentScroll / totalHeight));
+
+      if (progress < 0.25) setActiveStep(0);
+      else if (progress < 0.50) setActiveStep(1);
+      else if (progress < 0.75) setActiveStep(2);
+      else setActiveStep(3);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <section id="process" className="relative py-28 px-6 max-w-7xl mx-auto">
-      {/* Background Subtle Light */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none -z-10" />
-
-      {/* Header */}
-      <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-        <span className="px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
-          How We Build
-        </span>
-        <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-          The Execution Engine
-        </h2>
-        <p className="text-neutral-400 text-base">
-          Click through our 4-phase engineering process from strategy to final deployment.
-        </p>
-      </div>
-
-      {/* Interactive Process Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+    // Reduced container height from h-[250vh] to h-[160vh] to eliminate bottom empty space
+    <section ref={containerRef} id="process" className="relative h-[160vh] bg-neutral-950">
+      
+      {/* Sticky Fullscreen Container */}
+      <div className="sticky top-0 h-screen flex flex-col justify-center px-6 max-w-7xl mx-auto overflow-hidden">
         
-        {/* Left Column: Interactive Navigation Steps */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
-          {steps.map((step, idx) => {
-            const Icon = step.icon;
-            const isActive = activeStep === idx;
-            return (
-              <button
-                key={step.id}
-                onClick={() => setActiveStep(idx)}
-                className={cn(
-                  "group relative w-full text-left p-6 rounded-3xl border transition-all duration-300 backdrop-blur-xl flex items-center justify-between overflow-hidden",
-                  isActive
-                    ? "bg-neutral-900/90 border-indigo-500/50 shadow-xl shadow-indigo-500/10"
-                    : "bg-neutral-950/40 border-neutral-800/80 hover:bg-neutral-900/40 hover:border-neutral-700"
-                )}
-              >
-                {/* Active Indicator Bar */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeBar"
-                    className={cn("absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b", step.color)}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-
-                <div className="flex items-center gap-4">
-                  <div
-                    className={cn(
-                      "w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-sm transition-transform group-hover:scale-105",
-                      isActive ? "bg-neutral-800 text-white shadow-inner" : "bg-neutral-900 text-neutral-400"
-                    )}
-                  >
-                    <Icon className={cn("w-5 h-5", isActive ? "text-indigo-400" : "text-neutral-500")} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-mono text-neutral-500 tracking-widest uppercase">
-                      Phase {step.id}
-                    </span>
-                    <h3 className={cn("text-base font-bold transition-colors", isActive ? "text-white" : "text-neutral-400")}>
-                      {step.title}
-                    </h3>
-                  </div>
-                </div>
-
-                <ArrowRight
-                  className={cn(
-                    "w-5 h-5 transition-transform duration-300",
-                    isActive ? "text-indigo-400 translate-x-1" : "text-neutral-600 opacity-0 group-hover:opacity-100"
-                  )}
-                />
-              </button>
-            );
-          })}
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8 sm:mb-12 border-b border-neutral-800/80 pb-6">
+          <h2 className="text-3xl sm:text-6xl font-extrabold text-white tracking-tight">
+            How we work<span className="text-indigo-500">.</span>
+          </h2>
+          <span className="text-xs font-mono tracking-widest text-indigo-400 uppercase bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+            // PROCESS PIPELINE
+          </span>
         </div>
 
-        {/* Right Column: Dynamic Stage Preview Terminal */}
-        <div className="lg:col-span-7">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeStep}
-              initial={{ opacity: 0, x: 20, scale: 0.98 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -20, scale: 0.98 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="h-full p-8 sm:p-12 rounded-3xl bg-neutral-900/80 border border-neutral-800/90 backdrop-blur-2xl shadow-2xl flex flex-col justify-between relative overflow-hidden"
-            >
-              {/* Background Accent Glow */}
-              <div
-                className={cn(
-                  "absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gradient-to-br opacity-20 blur-3xl pointer-events-none",
-                  steps[activeStep].color
-                )}
-              />
+        {/* 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          {/* Left Column: Numbered List */}
+          <div className="lg:col-span-5 space-y-6 sm:space-y-8">
+            {steps.map((step, idx) => {
+              const isActive = activeStep === idx;
+              return (
+                <div
+                  key={step.id}
+                  onClick={() => setActiveStep(idx)}
+                  className="cursor-pointer group flex items-start gap-4 transition-all duration-300"
+                >
+                  {/* Indicator Square */}
+                  <div className="pt-2 shrink-0">
+                    <div
+                      className={cn(
+                        "w-3.5 h-3.5 rounded-sm transition-all duration-300",
+                        isActive
+                          ? "bg-indigo-500 scale-125 shadow-lg shadow-indigo-500/50"
+                          : "bg-neutral-700 opacity-40 group-hover:opacity-70"
+                      )}
+                    />
+                  </div>
 
-              <div>
-                {/* Header Badge & ID */}
+                  {/* Text Header & Body */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={cn(
+                          "text-xs font-mono font-bold transition-colors duration-300",
+                          isActive ? "text-indigo-400" : "text-neutral-600"
+                        )}
+                      >
+                        {step.id}
+                      </span>
+                      <h3
+                        className={cn(
+                          "text-xl sm:text-3xl font-extrabold tracking-tight transition-colors duration-300",
+                          isActive ? "text-white" : "text-neutral-600 group-hover:text-neutral-400"
+                        )}
+                      >
+                        {step.title}
+                      </h3>
+                    </div>
+
+                    {isActive && (
+                      <motion.p
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="text-neutral-400 text-xs sm:text-sm leading-relaxed pt-2"
+                      >
+                        {step.description}
+                      </motion.p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Right Column: Terminal Card */}
+          <div className="lg:col-span-7">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, scale: 0.96, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -15 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="relative p-6 sm:p-10 rounded-3xl bg-neutral-900/90 border border-neutral-800 backdrop-blur-2xl shadow-2xl shadow-black overflow-hidden"
+              >
+                {/* Background Glow */}
+                <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
+
+                {/* Badge & ID */}
                 <div className="flex items-center justify-between mb-6">
-                  <span className={cn("px-3.5 py-1 rounded-full text-xs font-semibold border", steps[activeStep].badgeColor)}>
-                    {steps[activeStep].tagline}
+                  <span className="text-xs font-mono font-bold tracking-widest text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
+                    {steps[activeStep].badge}
                   </span>
-                  <span className="text-4xl font-extrabold text-neutral-800 font-mono">
+                  <span className="text-4xl font-black text-neutral-800 font-mono">
                     {steps[activeStep].id}
                   </span>
                 </div>
 
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                <h4 className="text-xl sm:text-3xl font-bold text-white mb-6">
                   {steps[activeStep].title}
-                </h3>
-
-                <p className="text-neutral-300 text-sm sm:text-base leading-relaxed mb-8">
-                  {steps[activeStep].description}
-                </p>
+                </h4>
 
                 {/* Deliverables Checklist */}
-                <div className="space-y-3 pt-6 border-t border-neutral-800/80">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-4">
-                    Key Deliverables & Milestones:
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {steps[activeStep].deliverables.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2.5 text-sm font-medium text-neutral-200">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>{item}</span>
-                      </div>
+                <div className="space-y-3 pt-6 border-t border-neutral-800">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500 block mb-3">
+                    Key Execution Artifacts:
+                  </span>
+                  {steps[activeStep].deliverables.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-xs sm:text-sm font-medium text-neutral-200">
+                      <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Step Dots Footer */}
+                <div className="mt-8 pt-6 border-t border-neutral-800/80 flex items-center justify-between text-xs font-mono text-neutral-500">
+                  <span>STEP {activeStep + 1} OF 4</span>
+                  <div className="flex gap-1.5">
+                    {[0, 1, 2, 3].map((dot) => (
+                      <div
+                        key={dot}
+                        className={cn(
+                          "w-2 h-2 rounded-full transition-all duration-300",
+                          dot === activeStep ? "bg-indigo-500 w-6" : "bg-neutral-800"
+                        )}
+                      />
                     ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Progress Footer */}
-              <div className="mt-8 pt-6 border-t border-neutral-800/60 flex items-center justify-between text-xs text-neutral-500 font-mono">
-                <span>STAGE {activeStep + 1} OF 4</span>
-                <span className="text-indigo-400 font-semibold">ENGINEERING READY →</span>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
         </div>
 
       </div>
