@@ -6,69 +6,97 @@ import { useEffect, useRef, useState } from "react";
 // Strictly small letters only (a-z)
 const ASCII_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
-interface PixelGrid {
-  cols: number;
-  rows: number;
-  data: Uint8ClampedArray;
-  imgRatio: number;
-}
-
 export default function AsciiArt() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: -1000, y: -1000, radius: 14 });
-  const [grid, setGrid] = useState<PixelGrid | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mouseRef = useRef({ x: -1000, y: -1000, radius: 9 });
 
-  // Extract image pixels into memory once
+  const [mediaSource, setMediaSource] = useState<{
+    type: "video" | "image";
+    src: string;
+  } | null>(null);
+
+  const [isMediaReady, setIsMediaReady] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  // Auto-detect media source (tries profile.mp4 first)
   useEffect(() => {
-    let isCancelled = false;
+    let isMounted = true;
 
-    const processImage = (src: string, isFallback = false) => {
-      const img = new Image();
-      img.src = src;
-
-      img.onload = () => {
-        if (isCancelled) return;
-        const sampleCanvas = document.createElement("canvas");
-        const sampleCtx = sampleCanvas.getContext("2d");
-        if (!sampleCtx) return;
-
-        const cols = 85;
-        const imgRatio = img.naturalWidth / img.naturalHeight;
-        const rows = Math.round((cols / imgRatio) * 0.55);
-
-        sampleCanvas.width = cols;
-        sampleCanvas.height = rows;
-        sampleCtx.clearRect(0, 0, cols, rows);
-        sampleCtx.drawImage(img, 0, 0, cols, rows);
-
-        try {
-          const imgData = sampleCtx.getImageData(0, 0, cols, rows);
-          setGrid({
-            cols,
-            rows,
-            data: imgData.data,
-            imgRatio,
-          });
-        } catch (err) {
-          console.error("Canvas pixel error:", err);
+    const checkMedia = async () => {
+      // 1. Try MP4 video
+      try {
+        const res = await fetch("/profile.mp4", { method: "HEAD" });
+        if (res.ok && isMounted) {
+          setMediaSource({ type: "video", src: "/profile.mp4" });
+          return;
         }
-      };
+      } catch (e) {}
 
-      img.onerror = () => {
-        if (!isFallback && !isCancelled) {
-          processImage("/profile.jpg", true);
+      // 2. Try PNG
+      try {
+        const res = await fetch("/profile.png", { method: "HEAD" });
+        if (res.ok && isMounted) {
+          setMediaSource({ type: "image", src: "/profile.png" });
+          return;
         }
-      };
+      } catch (e) {}
+
+      // 3. Fallback to JPG
+      if (isMounted) {
+        setMediaSource({ type: "image", src: "/profile.jpg" });
+      }
     };
 
-    processImage("/profile.png");
+    checkMedia();
 
     return () => {
-      isCancelled = true;
+      isMounted = false;
     };
   }, []);
 
-  // Continuous Fast Canvas Render Loop
+  // Force video playback when video is ready
+  useEffect(() => {
+    if (mediaSource?.type === "video" && videoRef.current) {
+      const video = videoRef.current;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsMediaReady(true))
+          .catch(() => {
+            setIsMediaReady(true);
+          });
+      }
+    }
+  }, [mediaSource]);
+
+  // Load static image fallback if no video
+  useEffect(() => {
+    if (!mediaSource || mediaSource.type !== "image") return;
+
+    const img = new Image();
+    img.src = mediaSource.src;
+    img.onload = () => {
+      imgRef.current = img;
+      setIsMediaReady(true);
+    };
+    img.onerror = () => {
+      if (mediaSource.src === "/profile.png") {
+        const fallbackJpg = new Image();
+        fallbackJpg.src = "/profile.jpg";
+        fallbackJpg.onload = () => {
+          imgRef.current = fallbackJpg;
+          setIsMediaReady(true);
+        };
+      }
+    };
+  }, [mediaSource]);
+
+  // Continuous Canvas Render Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -76,6 +104,9 @@ export default function AsciiArt() {
     if (!ctx) return;
 
     let animationFrameId: number;
+
+    const offCanvas = document.createElement("canvas");
+    const offCtx = offCanvas.getContext("2d");
 
     const resizeCanvas = () => {
       if (!canvas.parentElement) return;
@@ -86,7 +117,7 @@ export default function AsciiArt() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Track mouse position
+    // Track mouse coordinates
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouseRef.current.x = e.clientX - rect.left;
@@ -102,74 +133,104 @@ export default function AsciiArt() {
     canvas.addEventListener("mouseleave", handleMouseLeave);
 
     const render = () => {
-      // Clear canvas
+      // Clear canvas so background stays 100% transparent
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (grid) {
-        const { cols, rows, data, imgRatio } = grid;
+      let currentElement: HTMLImageElement | HTMLVideoElement | null = null;
 
-        const maxW = canvas.width;
-        const maxH = canvas.height;
+      if (mediaSource?.type === "video" && videoRef.current) {
+        currentElement = videoRef.current;
+      } else if (mediaSource?.type === "image" && imgRef.current && isMediaReady) {
+        currentElement = imgRef.current;
+      }
 
-        let renderW = maxW;
-        let renderH = maxW / imgRatio;
+      if (currentElement && offCtx) {
+        const naturalW =
+          (currentElement as HTMLVideoElement).videoWidth ||
+          (currentElement as HTMLImageElement).naturalWidth ||
+          1;
+        const naturalH =
+          (currentElement as HTMLVideoElement).videoHeight ||
+          (currentElement as HTMLImageElement).naturalHeight ||
+          1;
 
-        if (renderH > maxH) {
-          renderH = maxH;
-          renderW = maxH * imgRatio;
-        }
+        if (naturalW > 1 && naturalH > 1) {
+          const cols = 85;
+          const imgRatio = naturalW / naturalH;
+          const rows = Math.round((cols / imgRatio) * 0.55);
 
-        const stepX = renderW / cols;
-        const stepY = renderH / rows;
+          offCanvas.width = cols;
+          offCanvas.height = rows;
 
-        const offsetX = (canvas.width - renderW) / 2;
-        const offsetY = (canvas.height - renderH) / 2;
+          try {
+            offCtx.clearRect(0, 0, cols, rows);
+            offCtx.drawImage(currentElement, 0, 0, cols, rows);
 
-        const fontSize = stepY * 0.9;
-        ctx.font = `${fontSize}px monospace`;
+            const imgData = offCtx.getImageData(0, 0, cols, rows);
+            const data = imgData.data;
 
-        // Render photo with delicate, soft opacity
-        for (let r = 0; r < rows; r++) {
-          for (let c = 0; c < cols; c++) {
-            const idx = (r * cols + c) * 4;
-            const red = data[idx];
-            const green = data[idx + 1];
-            const blue = data[idx + 2];
-            const alpha = data[idx + 3];
+            const maxW = canvas.width;
+            const maxH = canvas.height;
 
-            // Skip transparent PNG background pixels
-            if (alpha < 30) continue;
+            let renderW = maxW;
+            let renderH = maxW / imgRatio;
 
-            const brightness = (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
-
-            // Skip dark/shadow pixels to keep portrait thin and ethereal
-            if (brightness < 0.12) continue;
-
-            const charIdx = Math.floor(brightness * (ASCII_CHARS.length - 1));
-            const char = ASCII_CHARS[charIdx] || "a";
-
-            const charX = offsetX + c * stepX;
-            const charY = offsetY + r * stepY + fontSize * 0.8;
-
-            const distToMouse = Math.hypot(
-              charX - mouseRef.current.x,
-              charY - mouseRef.current.y
-            );
-
-            if (distToMouse < mouseRef.current.radius) {
-              // Vibrant Hover Spotlight
-              const intensity = 1 - distToMouse / mouseRef.current.radius;
-              ctx.fillStyle = `rgba(129, 140, 248, ${0.85 + intensity * 0.15})`; // Indigo Glow
-              ctx.font = `bold ${fontSize + intensity * 1.5}px monospace`;
-            } else {
-              // Soft, subtle default character opacity (8% - 35%)
-              const softOpacity = 0.08 + brightness * 0.32;
-              ctx.fillStyle = `rgba(168, 85, 247, ${softOpacity})`; // Delicate Purple
-              ctx.font = `${fontSize}px monospace`;
+            if (renderH > maxH) {
+              renderH = maxH;
+              renderW = maxH * imgRatio;
             }
 
-            ctx.fillText(char, charX, charY);
-          }
+            const stepX = renderW / cols;
+            const stepY = renderH / rows;
+
+            const offsetX = (canvas.width - renderW) / 2;
+            const offsetY = (canvas.height - renderH) / 2;
+
+            const fontSize = stepY * 0.9;
+            ctx.font = `${fontSize}px monospace`;
+
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                const idx = (r * cols + c) * 4;
+                const red = data[idx];
+                const green = data[idx + 1];
+                const blue = data[idx + 2];
+                const alpha = data[idx + 3];
+
+                // 1. Skip transparent pixels
+                if (alpha < 30) continue;
+
+                // 2. SKIP WHITE BACKGROUND (#ffffff) PIXELS!
+                const isWhiteBg = red > 215 && green > 215 && blue > 215;
+                const brightness = (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
+
+                if (isWhiteBg || brightness > 0.82) continue; // Clears white video background!
+
+                const charIdx = Math.floor((1 - brightness) * (ASCII_CHARS.length - 1));
+                const char = ASCII_CHARS[charIdx] || "a";
+
+                const charX = offsetX + c * stepX;
+                const charY = offsetY + r * stepY + fontSize * 0.8;
+
+                const distToMouse = Math.hypot(
+                  charX - mouseRef.current.x,
+                  charY - mouseRef.current.y
+                );
+
+                if (distToMouse < mouseRef.current.radius) {
+                  const intensity = 1 - distToMouse / mouseRef.current.radius;
+                  ctx.fillStyle = `#ffffff`; // Bright white micro highlight
+                  ctx.font = `bold ${fontSize + intensity * 1.5}px monospace`;
+                } else {
+                  const softOpacity = 0.2 + (1 - brightness) * 0.8;
+                  ctx.fillStyle = `rgba(168, 85, 247, ${softOpacity})`;
+                  ctx.font = `${fontSize}px monospace`;
+                }
+
+                ctx.fillText(char, charX, charY);
+              }
+            }
+          } catch (err) {}
         }
       }
 
@@ -184,11 +245,29 @@ export default function AsciiArt() {
       canvas.removeEventListener("mouseleave", handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [grid]);
+  }, [mediaSource, isMediaReady]);
 
   return (
     <div className="relative w-full h-[420px] sm:h-[500px] lg:h-[550px] flex items-center justify-center">
-      <canvas ref={canvasRef} className="w-full h-full cursor-crosshair" />
+      {mediaSource?.type === "video" && (
+        <video
+          ref={videoRef}
+          src={mediaSource.src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute top-0 left-0 w-1 h-1 opacity-0 pointer-events-none -z-50"
+          onLoadedData={() => {
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {});
+              setIsMediaReady(true);
+            }
+          }}
+        />
+      )}
+
+      <canvas ref={canvasRef} className="w-full h-full cursor-default" />
     </div>
   );
 }
