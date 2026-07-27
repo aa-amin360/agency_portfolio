@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ContentProvider } from "@/src/context/ContentContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Next-Gen Software Agency | Web, Apps & CMS",
-  description: "High-performance software agency building web apps, mobile apps, custom websites, and CMS solutions (WordPress, Shopify, Wix).",
+  description:
+    "High-performance software agency building web apps, mobile apps, custom websites, and CMS solutions (WordPress, Shopify, Wix).",
 };
 
 export default function RootLayout({
@@ -30,7 +32,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="bg-neutral-950 text-white antialiased selection:bg-indigo-500 selection:text-white">
-        {children}
+        <ContentProvider>{children}</ContentProvider>
       </body>
     </html>
   );

@@ -5,46 +5,15 @@ import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-
-const steps = [
-  {
-    id: "01",
-    title: "Send us a brief.",
-    description:
-      "One paragraph is enough. We reply within 24 business hours with architectural breakdown, tech feasibility, and scope assessment.",
-    badge: "PHASE 01 // DISCOVERY",
-    deliverables: ["Product Architecture", "Tech Stack Selection", "Scope & Budget Mapping"],
-  },
-  {
-    id: "02",
-    title: "One conversation.",
-    description:
-      "You tell us where the brand is going. We give you a clear picture of the design artifacts, timeline, and cost before you commit to anything.",
-    badge: "PHASE 02 // ROADMAP",
-    deliverables: ["Figma UI/UX Wireframes", "Interactive 3D Prototypes", "Milestone Timeline"],
-  },
-  {
-    id: "03",
-    title: "Design and build.",
-    description:
-      "Custom-coded from the ground up using Next.js, React, Flutter, or Shopify/WordPress. Motion is the medium, running through every transition and interaction.",
-    badge: "PHASE 03 // ENGINEERING",
-    deliverables: ["Modular Custom Code", "60fps GSAP & 3D Motion", "CMS / Admin Integration"],
-  },
-  {
-    id: "04",
-    title: "Ship.",
-    description:
-      "Rigorous cross-browser testing, 100/100 Lighthouse performance, Core Web Vitals optimization, and seamless automated CI/CD deployment.",
-    badge: "PHASE 04 // LAUNCH & SCALE",
-    deliverables: ["Lighthouse 100 Audit", "SEO & Meta Optimization", "Production Server Deployment"],
-  },
-];
+import { useContent } from "@/src/context/ContentContext";
 
 export default function Process() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(0);
+  const { content } = useContent();
+  const steps = content.process;
 
+  // Scroll height & speed untouched (400vh)
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -68,6 +37,7 @@ export default function Process() {
   }, []);
 
   return (
+    // Scroll height kept untouched at h-[400vh]
     <section ref={containerRef} id="process" className="relative h-[400vh] bg-neutral-950">
       
       {/* Sticky Fullscreen Container */}
@@ -92,7 +62,7 @@ export default function Process() {
               const isActive = activeStep === idx;
               return (
                 <div
-                  key={step.id}
+                  key={step.id || idx}
                   onClick={() => setActiveStep(idx)}
                   className="cursor-pointer group flex items-start gap-4 transition-all duration-300"
                 >
@@ -163,15 +133,15 @@ export default function Process() {
                 {/* Badge & ID */}
                 <div className="flex items-center justify-between mb-6">
                   <span className="text-xs font-mono font-bold tracking-widest text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full border border-indigo-500/20">
-                    {steps[activeStep].badge}
+                    {steps[activeStep]?.badge || `PHASE 0${activeStep + 1}`}
                   </span>
                   <span className="text-4xl font-black text-neutral-800 font-mono">
-                    {steps[activeStep].id}
+                    {steps[activeStep]?.id || `0${activeStep + 1}`}
                   </span>
                 </div>
 
                 <h4 className="text-xl sm:text-3xl font-bold text-white mb-6">
-                  {steps[activeStep].title}
+                  {steps[activeStep]?.title}
                 </h4>
 
                 {/* Deliverables Checklist */}
@@ -179,7 +149,7 @@ export default function Process() {
                   <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500 block mb-3">
                     Key Execution Artifacts:
                   </span>
-                  {steps[activeStep].deliverables.map((item, i) => (
+                  {steps[activeStep]?.deliverables?.map((item: string, i: number) => (
                     <div key={i} className="flex items-center gap-3 text-xs sm:text-sm font-medium text-neutral-200">
                       <CheckCircle2 className="w-4 h-4 text-indigo-400 shrink-0" />
                       <span>{item}</span>

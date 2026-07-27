@@ -6,8 +6,12 @@ import { ArrowRight, Sparkles, Code2, Smartphone, Globe } from "lucide-react";
 import Link from "next/link";
 import HeroCanvas from "@/src/components/HeroCanvas";
 import AsciiArt from "@/src/components/AsciiArt";
+import { useContent } from "@/src/context/ContentContext";
 
 export default function Hero() {
+  const { content } = useContent();
+  const { hero } = content;
+
   return (
     <section className="relative min-h-screen flex flex-col justify-center px-6 pt-32 pb-16 overflow-hidden">
       {/* 3D Background Canvas */}
@@ -16,7 +20,7 @@ export default function Hero() {
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 blur-[140px] rounded-full pointer-events-none -z-20" />
 
-      {/* 2-Column Responsive Grid */}
+      {/* 2-Column Responsive Layout Grid */}
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center z-10">
         
         {/* Left Column: Headline, Subtitle & CTA */}
@@ -30,7 +34,7 @@ export default function Hero() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neutral-800 bg-neutral-900/60 backdrop-blur-md text-xs sm:text-sm text-neutral-300 shadow-inner"
           >
             <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
-            <span>Accepting New Projects & Scale-ups</span>
+            <span>{hero.badge}</span>
           </motion.div>
 
           {/* Main Animated Headline */}
@@ -40,9 +44,9 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1]"
           >
-            Crafting Digital <br className="hidden sm:inline" />
+            {hero.titleLine1} <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Experiences That Scale
+              {hero.titleLine2}
             </span>
           </motion.h1>
 
@@ -53,7 +57,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-base sm:text-lg text-neutral-400 max-w-xl font-normal leading-relaxed"
           >
-            We are a full-service software agency specializing in high-performance Web Apps, Mobile Apps, Custom Websites, and CMS platforms like Shopify, WordPress, and Wix.
+            {hero.subtitle}
           </motion.p>
 
           {/* CTA Buttons */}

@@ -5,45 +5,10 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight, Sparkles, Layers } from "lucide-react";
 import Link from "next/link";
-
-const projects = [
-  {
-    id: 1,
-    title: "Apex AI — Next-Gen SaaS Platform",
-    category: "Custom Web App / Next.js",
-    metric: "3.2x User Growth",
-    description: "Architected a full-stack AI platform with real-time WebSockets, GSAP interactive dashboard, and Stripe payments.",
-    tags: ["Next.js", "TypeScript", "GSAP", "Tailwind"],
-    glowGradient: "from-indigo-600/40 via-purple-600/20 to-transparent",
-    border: "hover:border-indigo-500/80",
-    accentColor: "bg-indigo-500",
-  },
-  {
-    id: 2,
-    title: "Luxe Atelier — High-End Fashion Store",
-    category: "Shopify E-Commerce",
-    metric: "+180% Sales Conversion",
-    description: "Custom headless Shopify theme with 3D product previews (Three.js), smooth cart animations, and instant checkout.",
-    tags: ["Shopify", "Three.js", "Liquid", "Tailwind"],
-    glowGradient: "from-pink-600/40 via-rose-600/20 to-transparent",
-    border: "hover:border-pink-500/80",
-    accentColor: "bg-pink-500",
-  },
-  {
-    id: 3,
-    title: "NeuraHealth — Mobile Fitness Tracker",
-    category: "Mobile App / iOS & Android",
-    metric: "100k+ Active Downloads",
-    description: "Cross-platform mobile application featuring health telemetry tracking, custom micro-interactions, and dark mode UI.",
-    tags: ["React Native", "Flutter", "Node.js", "Figma"],
-    glowGradient: "from-cyan-600/40 via-blue-600/20 to-transparent",
-    border: "hover:border-cyan-500/80",
-    accentColor: "bg-cyan-500",
-  },
-];
+import { useContent } from "@/src/context/ContentContext";
 
 interface CardProps {
-  project: (typeof projects)[0];
+  project: any;
   index: number;
   progress: any;
   range: number[];
@@ -68,16 +33,15 @@ function Card({ project, index, progress, range, targetScale }: CardProps) {
           rotateX,
           transformStyle: "preserve-3d",
         }}
-        // Solid bg-neutral-900 used to block 100% of underlying card text bleed-through
-        className={`relative w-full max-w-5xl rounded-3xl p-8 sm:p-12 bg-neutral-900 border border-neutral-800 shadow-2xl shadow-black transition-all duration-300 ${project.border} group overflow-hidden`}
+        className={`relative w-full max-w-5xl rounded-3xl p-8 sm:p-12 bg-neutral-900 border border-neutral-800 shadow-2xl shadow-black transition-all duration-300 ${project.border || "hover:border-indigo-500/80"} group overflow-hidden`}
       >
         {/* Inner Ambient Glow over solid background */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${project.glowGradient} opacity-60 pointer-events-none -z-10`} />
+        <div className={`absolute inset-0 bg-gradient-to-br ${project.glowGradient || "from-indigo-600/40 via-purple-600/20 to-transparent"} opacity-60 pointer-events-none -z-10`} />
 
         {/* Top Header inside Card */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
-            <span className={`w-3 h-3 rounded-full ${project.accentColor} animate-ping`} />
+            <span className={`w-3 h-3 rounded-full ${project.accentColor || "bg-indigo-500"} animate-ping`} />
             <span className="text-xs font-semibold uppercase tracking-widest text-neutral-300 bg-neutral-950/80 px-3 py-1 rounded-full border border-neutral-800">
               {project.category}
             </span>
@@ -100,7 +64,7 @@ function Card({ project, index, progress, range, targetScale }: CardProps) {
 
             {/* Tech Badges */}
             <div className="flex flex-wrap gap-2 pt-4">
-              {project.tags.map((tag) => (
+              {project.tags?.map((tag: string) => (
                 <span
                   key={tag}
                   className="px-3 py-1 text-xs font-medium bg-neutral-950/90 border border-neutral-800 rounded-lg text-neutral-300"
@@ -129,6 +93,8 @@ function Card({ project, index, progress, range, targetScale }: CardProps) {
 
 export default function Work() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { content } = useContent();
+  const projects = content.projects;
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -150,17 +116,17 @@ export default function Work() {
         </p>
       </div>
 
-      {/* 3D Stacking Cards Deck */}
+      {/* 3D Stacking Cards Deck powered by Admin Context */}
       <div className="relative">
         {projects.map((project, i) => {
           const targetScale = 1 - (projects.length - i) * 0.05;
           return (
             <Card
-              key={project.id}
+              key={project.id || i}
               project={project}
               index={i}
               progress={scrollYProgress}
-              range={[i * (1 / projects.length), 1]}
+              range={[i * (1 / Math.max(1, projects.length)), 1]}
               targetScale={targetScale}
             />
           );
