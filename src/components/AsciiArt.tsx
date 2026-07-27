@@ -96,7 +96,7 @@ export default function AsciiArt() {
     };
   }, [mediaSource]);
 
-  // Continuous Canvas Render Loop
+  // Continuous Canvas Render Loop with Matrix Character Shuffle
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -133,7 +133,7 @@ export default function AsciiArt() {
     canvas.addEventListener("mouseleave", handleMouseLeave);
 
     const render = () => {
-      // Clear canvas so background stays 100% transparent
+      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       let currentElement: HTMLImageElement | HTMLVideoElement | null = null;
@@ -189,6 +189,9 @@ export default function AsciiArt() {
             const fontSize = stepY * 0.9;
             ctx.font = `${fontSize}px monospace`;
 
+            // Time factor driving the constant matrix character shuffle
+            const timeFactor = Math.floor(Date.now() / 70);
+
             for (let r = 0; r < rows; r++) {
               for (let c = 0; c < cols; c++) {
                 const idx = (r * cols + c) * 4;
@@ -197,16 +200,19 @@ export default function AsciiArt() {
                 const blue = data[idx + 2];
                 const alpha = data[idx + 3];
 
-                // 1. Skip transparent pixels
+                // Skip transparent pixels
                 if (alpha < 30) continue;
 
-                // 2. SKIP WHITE BACKGROUND (#ffffff) PIXELS!
+                // Skip white video background
                 const isWhiteBg = red > 215 && green > 215 && blue > 215;
                 const brightness = (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
 
-                if (isWhiteBg || brightness > 0.82) continue; // Clears white video background!
+                if (isWhiteBg || brightness > 0.82) continue;
 
-                const charIdx = Math.floor((1 - brightness) * (ASCII_CHARS.length - 1));
+                // Continuous Matrix Character Shuffle offset
+                const shuffleOffset = (r * 3 + c * 7 + timeFactor) % ASCII_CHARS.length;
+                const baseIdx = Math.floor((1 - brightness) * (ASCII_CHARS.length - 1));
+                const charIdx = (baseIdx + shuffleOffset) % ASCII_CHARS.length;
                 const char = ASCII_CHARS[charIdx] || "a";
 
                 const charX = offsetX + c * stepX;
