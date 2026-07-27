@@ -13,28 +13,28 @@ export default function Hero() {
   const { hero } = content;
 
   return (
-    // Removed forced min-h-screen & flex centering to eliminate top and bottom black voids
-    <section className="relative pt-28 pb-12 px-6 overflow-hidden">
+    // Mobile padding & bottom margins tightened (pt-20 pb-4 sm:pt-28 sm:pb-12)
+    <section className="relative pt-20 pb-4 sm:pt-28 sm:pb-12 px-4 sm:px-6 overflow-hidden">
       {/* 3D Background Canvas */}
       <HeroCanvas />
 
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none -z-20" />
 
-      {/* Compact Content Layout */}
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+      {/* Mobile Optimized Compact Grid */}
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 items-center z-10">
         
         {/* Left Column: Headline & Copy */}
-        <div className="lg:col-span-7 flex flex-col items-start justify-center gap-5 w-full">
+        <div className="lg:col-span-7 flex flex-col items-start justify-center gap-4 sm:gap-5 w-full">
           
           {/* Status Badge */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neutral-800 bg-neutral-900/80 backdrop-blur-md text-xs sm:text-sm font-medium text-neutral-300 shadow-inner"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-neutral-800 bg-neutral-900/80 backdrop-blur-md text-xs sm:text-sm font-medium text-neutral-300 shadow-inner"
           >
-            <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
             <span>{hero.badge}</span>
           </motion.div>
 
@@ -43,7 +43,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.08] w-full"
+            className="text-3xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.08] w-full"
           >
             {hero.titleLine1} <br />
             <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -56,7 +56,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="text-base sm:text-lg text-neutral-400 max-w-2xl font-normal leading-relaxed"
+            className="text-sm sm:text-lg text-neutral-400 max-w-2xl font-normal leading-relaxed"
           >
             {hero.subtitle}
           </motion.p>
@@ -66,58 +66,58 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.45 }}
-            className="flex flex-col sm:flex-row items-center gap-4 pt-1 w-full sm:w-auto"
+            className="flex flex-col sm:flex-row items-center gap-3.5 pt-1 w-full sm:w-auto"
           >
             <Link
               href="#contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition-all duration-300"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-sm shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-95 transition-all duration-300"
             >
               <span>Start a Project</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="#services"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full border border-neutral-800 bg-neutral-900/70 hover:bg-neutral-800 text-neutral-300 hover:text-white font-medium text-sm backdrop-blur-md transition-all duration-300"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 sm:py-4 rounded-full border border-neutral-800 bg-neutral-900/70 hover:bg-neutral-800 text-neutral-300 hover:text-white font-medium text-sm backdrop-blur-md transition-all duration-300"
             >
               Explore Services
             </Link>
           </motion.div>
 
-          {/* Quick Tech Highlights Footer Bar */}
+          {/* Quick Tech Highlights */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.6 }}
-            className="grid grid-cols-3 gap-4 sm:gap-8 pt-6 border-t border-neutral-800/80 w-full"
+            className="grid grid-cols-3 gap-2 sm:gap-8 pt-4 sm:pt-6 border-t border-neutral-800/80 w-full"
           >
             <div>
-              <div className="flex items-center gap-2 text-indigo-400 font-bold text-sm sm:text-base">
-                <Globe className="w-4 h-4 shrink-0" /> Custom Web
+              <div className="flex items-center gap-1.5 text-indigo-400 font-bold text-xs sm:text-base">
+                <Globe className="w-3.5 h-3.5 shrink-0" /> Custom Web
               </div>
-              <span className="text-xs text-neutral-500 mt-1 block">Next.js & React</span>
+              <span className="text-[11px] text-neutral-500 mt-0.5 block">Next.js & React</span>
             </div>
             <div>
-              <div className="flex items-center gap-2 text-purple-400 font-bold text-sm sm:text-base">
-                <Smartphone className="w-4 h-4 shrink-0" /> Mobile Apps
+              <div className="flex items-center gap-1.5 text-purple-400 font-bold text-xs sm:text-base">
+                <Smartphone className="w-3.5 h-3.5 shrink-0" /> Mobile Apps
               </div>
-              <span className="text-xs text-neutral-500 mt-1 block">iOS & Android</span>
+              <span className="text-[11px] text-neutral-500 mt-0.5 block">iOS & Android</span>
             </div>
             <div>
-              <div className="flex items-center gap-2 text-pink-400 font-bold text-sm sm:text-base">
-                <Code2 className="w-4 h-4 shrink-0" /> Any CMS
+              <div className="flex items-center gap-1.5 text-pink-400 font-bold text-xs sm:text-base">
+                <Code2 className="w-3.5 h-3.5 shrink-0" /> Any CMS
               </div>
-              <span className="text-xs text-neutral-500 mt-1 block">WP, Shopify, Wix</span>
+              <span className="text-[11px] text-neutral-500 mt-0.5 block">WP, Shopify, Wix</span>
             </div>
           </motion.div>
 
         </div>
 
-        {/* Right Column: Integrated ASCII Portrait Canvas */}
+        {/* Right Column: ASCII Portrait Canvas */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.3 }}
-          className="lg:col-span-5 w-full flex items-center justify-center"
+          className="lg:col-span-5 w-full flex items-center justify-center min-h-0"
         >
           <AsciiArt />
         </motion.div>

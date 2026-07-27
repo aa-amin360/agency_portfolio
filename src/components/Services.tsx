@@ -50,11 +50,12 @@ const services = [
 
 export default function Services() {
   return (
-    <section id="services" className="relative py-24 px-6 max-w-7xl mx-auto">
+    // Reduced top padding (pt-6 sm:pt-10) to pull section up snugly beneath full-size Hero Canvas
+    <section id="services" className="relative pt-6 sm:pt-10 pb-16 px-4 sm:px-6 max-w-7xl mx-auto">
       {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+      <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12 space-y-3">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
@@ -64,7 +65,7 @@ export default function Services() {
         </motion.div>
 
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -74,11 +75,11 @@ export default function Services() {
         </motion.h2>
 
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-neutral-400 text-base sm:text-lg"
+          className="text-neutral-400 text-sm sm:text-base max-w-2xl mx-auto"
         >
           From complex SaaS platforms to full CMS e-commerce stores and mobile apps — we deliver top-tier engineering.
         </motion.p>
@@ -91,12 +92,12 @@ export default function Services() {
           return (
             <motion.div
               key={service.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 25 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className={cn(
-                "group relative p-8 rounded-3xl bg-neutral-900/60 border border-neutral-800/80 backdrop-blur-xl overflow-hidden flex flex-col justify-between transition-all duration-500 hover:scale-[1.01] shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10",
+                "group relative p-6 sm:p-8 rounded-3xl bg-neutral-900/60 border border-neutral-800/80 backdrop-blur-xl overflow-hidden flex flex-col justify-between transition-all duration-500 hover:scale-[1.01] shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10",
                 service.featured ? "md:col-span-2 lg:col-span-2" : "col-span-1"
               )}
             >

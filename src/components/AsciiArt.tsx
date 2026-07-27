@@ -19,12 +19,11 @@ export default function AsciiArt() {
   const [isMediaReady, setIsMediaReady] = useState(false);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
-  // Auto-detect media source (tries profile.mp4 first)
+  // Auto-detect media source
   useEffect(() => {
     let isMounted = true;
 
     const checkMedia = async () => {
-      // 1. Try MP4 video
       try {
         const res = await fetch("/profile.mp4", { method: "HEAD" });
         if (res.ok && isMounted) {
@@ -33,7 +32,6 @@ export default function AsciiArt() {
         }
       } catch (e) {}
 
-      // 2. Try PNG
       try {
         const res = await fetch("/profile.png", { method: "HEAD" });
         if (res.ok && isMounted) {
@@ -42,7 +40,6 @@ export default function AsciiArt() {
         }
       } catch (e) {}
 
-      // 3. Fallback to JPG
       if (isMounted) {
         setMediaSource({ type: "image", src: "/profile.jpg" });
       }
@@ -55,7 +52,7 @@ export default function AsciiArt() {
     };
   }, []);
 
-  // Force video playback when video is ready
+  // Force video playback
   useEffect(() => {
     if (mediaSource?.type === "video" && videoRef.current) {
       const video = videoRef.current;
@@ -74,7 +71,7 @@ export default function AsciiArt() {
     }
   }, [mediaSource]);
 
-  // Load static image fallback if no video
+  // Load static image fallback
   useEffect(() => {
     if (!mediaSource || mediaSource.type !== "image") return;
 
@@ -96,7 +93,7 @@ export default function AsciiArt() {
     };
   }, [mediaSource]);
 
-  // Continuous Canvas Render Loop with Matrix Character Shuffle
+  // Continuous Canvas Render Loop (Full frame size restored)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -133,7 +130,6 @@ export default function AsciiArt() {
     canvas.addEventListener("mouseleave", handleMouseLeave);
 
     const render = () => {
-      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       let currentElement: HTMLImageElement | HTMLVideoElement | null = null;
@@ -155,7 +151,7 @@ export default function AsciiArt() {
           1;
 
         if (naturalW > 1 && naturalH > 1) {
-          const cols = 85;
+          const cols = 85; // Crisp density
           const imgRatio = naturalW / naturalH;
           const rows = Math.round((cols / imgRatio) * 0.55);
 
@@ -189,7 +185,6 @@ export default function AsciiArt() {
             const fontSize = stepY * 0.9;
             ctx.font = `${fontSize}px monospace`;
 
-            // Time factor driving the constant matrix character shuffle
             const timeFactor = Math.floor(Date.now() / 70);
 
             for (let r = 0; r < rows; r++) {
@@ -200,16 +195,13 @@ export default function AsciiArt() {
                 const blue = data[idx + 2];
                 const alpha = data[idx + 3];
 
-                // Skip transparent pixels
                 if (alpha < 30) continue;
 
-                // Skip white video background
                 const isWhiteBg = red > 215 && green > 215 && blue > 215;
                 const brightness = (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
 
                 if (isWhiteBg || brightness > 0.82) continue;
 
-                // Continuous Matrix Character Shuffle offset
                 const shuffleOffset = (r * 3 + c * 7 + timeFactor) % ASCII_CHARS.length;
                 const baseIdx = Math.floor((1 - brightness) * (ASCII_CHARS.length - 1));
                 const charIdx = (baseIdx + shuffleOffset) % ASCII_CHARS.length;
@@ -225,7 +217,7 @@ export default function AsciiArt() {
 
                 if (distToMouse < mouseRef.current.radius) {
                   const intensity = 1 - distToMouse / mouseRef.current.radius;
-                  ctx.fillStyle = `#ffffff`; // Bright white micro highlight
+                  ctx.fillStyle = `#ffffff`;
                   ctx.font = `bold ${fontSize + intensity * 1.5}px monospace`;
                 } else {
                   const softOpacity = 0.2 + (1 - brightness) * 0.8;
@@ -254,7 +246,8 @@ export default function AsciiArt() {
   }, [mediaSource, isMediaReady]);
 
   return (
-    <div className="relative w-full h-[420px] sm:h-[500px] lg:h-[550px] flex items-center justify-center">
+    // Restored full-size frame (h-[380px] sm:h-[480px] lg:h-[520px])
+    <div className="relative w-full h-[380px] sm:h-[480px] lg:h-[520px] flex items-center justify-center">
       {mediaSource?.type === "video" && (
         <video
           ref={videoRef}
