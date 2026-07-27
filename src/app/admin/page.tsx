@@ -16,23 +16,30 @@ import {
 } from "lucide-react";
 
 export default function AdminPage() {
-  const { content, updateHero, updateProjects, updateProcess, resetToDefault } =
-    useContent();
+  const { content, saveAllContent, resetToDefault } = useContent();
 
   const [activeTab, setActiveTab] = useState<"hero" | "projects" | "process">("hero");
   const [saveNotice, setSaveNotice] = useState(false);
 
-  // Local state for live editing
+  // Local state initialized with current content
   const [heroData, setHeroData] = useState(content.hero);
   const [projectsData, setProjectsData] = useState(content.projects);
   const [processData, setProcessData] = useState(content.process);
 
   const handleSave = () => {
-    updateHero(heroData);
-    updateProjects(projectsData);
-    updateProcess(processData);
+    // Atomic single call save function
+    saveAllContent({
+      hero: heroData,
+      projects: projectsData,
+      process: processData,
+    });
     setSaveNotice(true);
     setTimeout(() => setSaveNotice(false), 3000);
+  };
+
+  const handleReset = () => {
+    resetToDefault();
+    window.location.reload();
   };
 
   return (
@@ -60,7 +67,7 @@ export default function AdminPage() {
           </Link>
 
           <button
-            onClick={resetToDefault}
+            onClick={handleReset}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-rose-400 transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
@@ -189,7 +196,7 @@ export default function AdminPage() {
 
               {projectsData.map((project, idx) => (
                 <div
-                  key={project.id}
+                  key={project.id || idx}
                   className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800 space-y-4"
                 >
                   <div className="flex items-center justify-between text-xs font-mono text-indigo-400">
@@ -260,7 +267,7 @@ export default function AdminPage() {
 
               {processData.map((step, idx) => (
                 <div
-                  key={step.id}
+                  key={step.id || idx}
                   className="p-6 rounded-2xl bg-neutral-950/80 border border-neutral-800 space-y-4"
                 >
                   <div className="flex items-center justify-between text-xs font-mono text-indigo-400">

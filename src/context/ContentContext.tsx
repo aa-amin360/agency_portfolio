@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Default Initial Agency Content
+// Default Initial Content
 const initialContent = {
   hero: {
     badge: "Accepting New Projects & Scale-ups",
@@ -86,13 +86,11 @@ const initialContent = {
   ],
 };
 
-type ContentType = typeof initialContent;
+export type ContentType = typeof initialContent;
 
 interface ContentContextType {
   content: ContentType;
-  updateHero: (heroData: Partial<ContentType["hero"]>) => void;
-  updateProjects: (projects: ContentType["projects"]) => void;
-  updateProcess: (process: ContentType["process"]) => void;
+  saveAllContent: (newContent: ContentType) => void;
   resetToDefault: () => void;
 }
 
@@ -101,36 +99,38 @@ const ContentContext = createContext<ContentContextType | undefined>(undefined);
 export function ContentProvider({ children }: { children: React.ReactNode }) {
   const [content, setContent] = useState<ContentType>(initialContent);
 
-  // Load saved content from localStorage on browser load
+  // 1. Initial load from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("agency_site_content");
     if (saved) {
       try {
         setContent(JSON.parse(saved));
       } catch (e) {
-        console.error("Failed to parse saved site content", e);
+        console.error("Error reading saved content", e);
       }
     }
   }, []);
 
-  const saveContent = (newContent: ContentType) => {
+  // 2. Real-time cross-tab sync listener
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "agency_site_content" && e.newValue) {
+        try {
+          setContent(JSON.parse(e.newValue));
+        } catch (err) {
+          console.error("Storage sync error", err);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // Atomic single-call save function
+  const saveAllContent = (newContent: ContentType) => {
     setContent(newContent);
     localStorage.setItem("agency_site_content", JSON.stringify(newContent));
-  };
-
-  const updateHero = (heroData: Partial<ContentType["hero"]>) => {
-    const updated = { ...content, hero: { ...content.hero, ...heroData } };
-    saveContent(updated);
-  };
-
-  const updateProjects = (projects: ContentType["projects"]) => {
-    const updated = { ...content, projects };
-    saveContent(updated);
-  };
-
-  const updateProcess = (process: ContentType["process"]) => {
-    const updated = { ...content, process };
-    saveContent(updated);
   };
 
   const resetToDefault = () => {
@@ -139,9 +139,7 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ContentContext.Provider
-      value={{ content, updateHero, updateProjects, updateProcess, resetToDefault }}
-    >
+    <ContentContext.Provider value={{ content, saveAllContent, resetToDefault }}>
       {children}
     </ContentContext.Provider>
   );
